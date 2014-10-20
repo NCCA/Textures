@@ -3,7 +3,7 @@
 
 #include "NGLScene.h"
 #include <ngl/Camera.h>
-#include <ngl/TransformStack.h>
+#include <ngl/Transformation.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
