@@ -1,4 +1,4 @@
-#version 400
+#version 330 core
 
 /// @brief Model transform matrix passed in from Transform Class in main app
 uniform mat4 MVP;

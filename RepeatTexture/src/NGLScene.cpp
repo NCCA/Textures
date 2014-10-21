@@ -30,7 +30,6 @@ NGLScene::NGLScene(QWindow *_parent) : OpenGLWindow(_parent)
   m_spinYFace=0;
   setTitle("Simple OpenGL Texture");
 
-  m_texTimer = startTimer(50);
   m_speed=0;
   m_repeat=1;
 
@@ -140,7 +139,8 @@ void NGLScene::initialize()
   prim->createTrianglePlane("plane",10,10,20,20,ngl::Vec3(0,1,0));
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
-
+  // timer needs starting after gl context created
+  m_texTimer = startTimer(50);
 
 }
 

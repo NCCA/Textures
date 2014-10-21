@@ -1,8 +1,8 @@
-#version 400
+#version 330 core
 // this is a pointer to the current 2D texture object
 uniform sampler2D tex;
 // the vertex UV
-smooth in vec2 vertUV;
+in vec2 vertUV;
 // the final fragment colour
 layout (location =0) out vec4 outColour;
 void main ()
