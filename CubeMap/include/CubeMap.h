@@ -11,7 +11,7 @@ public :
           const std::string &_bottom, const std::string &_top,
           const std::string &_front, const std::string &_back);
 
-  CubeMap(char **_names);
+  CubeMap(std::string *_names);
 
   ~CubeMap(){  glDeleteTextures(1,&m_id);}
   void enable(){glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);   glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);}

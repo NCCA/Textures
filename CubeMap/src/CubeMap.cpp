@@ -26,11 +26,26 @@ CubeMap::CubeMap(const std::string &_right, const std::string &_left, const std:
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
-CubeMap::CubeMap(char **_names)
+
+CubeMap::CubeMap(std::string *_names)
 {
 	createCubeMap();
+	for(int i = 0; i < 6; i++)
+	{
+
+		ngl::Texture t(_names[i]);
+		GLuint width=t.getWidth();
+		GLuint height=t.getHeight();
+		GLuint format=t.getFormat();
+
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
+	}
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 }
+
 
 void CubeMap::createCubeMap()
 {

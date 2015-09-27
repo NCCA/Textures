@@ -88,9 +88,7 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
   Init->NGLQuit();
   delete m_cubeMap;
-  // remove the texture now we are done
-  glDeleteTextures(1,&m_textureName);
-
+  delete m_cubeMapDebug;
 }
 
 
@@ -152,8 +150,6 @@ void NGLScene::initialize()
   shader->linkProgramObject("TextureShader");
   shader->use("TextureShader");
   shader->autoRegisterUniforms("TextureShader");
-  ngl::Texture texture("textures/ratGrid.png");
-  m_textureName=texture.setTextureGL();
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
   prim->createSphere("sphere",1.0,40);
   prim->createCylinder("cylinder",0.5,5,30,30);
@@ -166,9 +162,10 @@ void NGLScene::initialize()
   m_cubeMap = new CubeMap("textures/right.png","textures/left.png",
                           "textures/bottom.png","textures/top.png",
                           "textures/front.png","textures/back.png");
-  m_cubeMapDebug = new CubeMap("textures/DebugRight.png","textures/DebugLeft.png",
-                          "textures/DebugBottom.png","textures/DebugTop.png",
-                          "textures/DebugFront.png","textures/DebugBack.png");
+  std::string debug[6]={"textures/DebugRight.png","textures/DebugLeft.png",
+                 "textures/DebugBottom.png","textures/DebugTop.png",
+                 "textures/DebugFront.png","textures/DebugBack.png"};
+  m_cubeMapDebug = new CubeMap(debug);
 
   createSkyBox();
 
@@ -181,7 +178,6 @@ void NGLScene::loadMatricesToShader()
   (*shader)["TextureShader"]->use();
   ngl::Mat4 M=m_mouseGlobalTX*m_transform.getMatrix();
   ngl::Mat4 MVP=M*m_cam->getVPMatrix();
-  std::cout<<M<<"\n";
   shader->setRegisteredUniform("MVP",MVP);
   shader->setRegisteredUniform("M",M);
   shader->setRegisteredUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
