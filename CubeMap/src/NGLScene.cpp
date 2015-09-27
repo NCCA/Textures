@@ -7,9 +7,10 @@
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
+#include <ngl/NGLStream.h>
 #include <QFont>
 
-const std::string NGLScene::s_vboNames[7]=
+const std::string NGLScene::s_vboNames[8]=
 {
   "sphere",
   "cylinder",
@@ -18,6 +19,7 @@ const std::string NGLScene::s_vboNames[7]=
   "plane",
   "torus",
   "teapot",
+  "cube"
 };
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
@@ -39,6 +41,44 @@ NGLScene::NGLScene(QWindow *_parent) : OpenGLWindow(_parent)
 
   m_polyMode=GL_FILL;
   m_primIndex=0;
+  m_debug=false;
+}
+
+void NGLScene::createSkyBox()
+{
+  // create a vao as a series of GL_TRIANGLES
+   m_skybox= ngl::VertexArrayObject::createVOA(GL_TRIANGLES);
+   m_skybox->bind();
+
+
+   const static GLubyte indices[]=  {
+                                       0,1,5,0,4,5, // back
+                                       3,2,6,7,6,3, // front
+                                       0,1,2,3,2,0, // top
+                                       4,5,6,7,6,4, // bottom
+                                       0,3,4,4,7,3,
+                                       1,5,2,2,6,5
+                                    };
+
+    GLfloat vertices[] = {-1,1,-1,
+                          1,1,-1,
+                          1,1,1,
+                          -1,1,1,
+                          -1,-1,-1,
+                          1,-1,-1,
+                          1,-1,1,
+                          -1,-1,1
+                         };
+
+    // in this case we are going to set our data as the vertices above
+
+    m_skybox->setIndexedData(24*sizeof(GLfloat),vertices[0],sizeof(indices),&indices[0],GL_UNSIGNED_BYTE,GL_STATIC_DRAW);
+    // now we set the attribute pointer to be 0 (as this matches vertIn in our shader)
+    m_skybox->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
+    m_skybox->setNumIndices(sizeof(indices));
+  // now unbind
+   m_skybox->unbind();
+
 }
 
 
@@ -47,6 +87,7 @@ NGLScene::~NGLScene()
   ngl::NGLInit *Init = ngl::NGLInit::instance();
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
   Init->NGLQuit();
+  delete m_cubeMap;
   // remove the texture now we are done
   glDeleteTextures(1,&m_textureName);
 
@@ -89,7 +130,7 @@ void NGLScene::initialize()
   m_cam= new ngl::Camera(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(45,(float)720.0/576.0,0.5,150);
+  m_cam->setShape(45,(float)720.0/576.0,0.1,350);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -110,8 +151,7 @@ void NGLScene::initialize()
 
   shader->linkProgramObject("TextureShader");
   shader->use("TextureShader");
-  shader->registerUniform("TextureShader","MVP");
-
+  shader->autoRegisterUniforms("TextureShader");
   ngl::Texture texture("textures/ratGrid.png");
   m_textureName=texture.setTextureGL();
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
@@ -123,6 +163,14 @@ void NGLScene::initialize()
   prim->createTorus("torus",0.15,0.4,40,40);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
+  m_cubeMap = new CubeMap("textures/right.png","textures/left.png",
+                          "textures/bottom.png","textures/top.png",
+                          "textures/front.png","textures/back.png");
+  m_cubeMapDebug = new CubeMap("textures/DebugRight.png","textures/DebugLeft.png",
+                          "textures/DebugBottom.png","textures/DebugTop.png",
+                          "textures/DebugFront.png","textures/DebugBack.png");
+
+  createSkyBox();
 
 }
 
@@ -131,16 +179,48 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["TextureShader"]->use();
-
-  ngl::Mat4 MVP=m_mouseGlobalTX*m_cam->getVPMatrix();
-
+  ngl::Mat4 M=m_mouseGlobalTX*m_transform.getMatrix();
+  ngl::Mat4 MVP=M*m_cam->getVPMatrix();
+  std::cout<<M<<"\n";
   shader->setRegisteredUniform("MVP",MVP);
+  shader->setRegisteredUniform("M",M);
+  shader->setRegisteredUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
+  ngl::Mat3 normalMatrix=M*m_cam->getViewMatrix();
+  normalMatrix.inverse();
+  shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
+
+
 }
 
 void NGLScene::render()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+  // need to bind the active texture before drawing
+
+  //render skybox without depth test
+  glDisable(GL_DEPTH_TEST);
+  m_transform.setScale(25,25,25);
+  // m_transform.setRotation(0,0,90);
+   m_mouseGlobalTX.identity();
+  loadMatricesToShader();
+  if(m_debug)
+    m_cubeMapDebug->enable();
+  else
+  m_cubeMap->enable();
+  //m_skybox->bind();
+  //m_skybox->draw();
+  //m_skybox->unbind();
+  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
+  shader->setUniform("reflectOn",0);
+  ngl::VAOPrimitives::instance()->draw("cube");
+  // now draw object
+  glEnable(GL_DEPTH_TEST);
+//  glEnable(GL_CULL_FACE);
+
+  m_transform.reset();
   // Rotation based on the mouse position for our global
   // transform
   ngl::Mat4 rotX;
@@ -154,10 +234,8 @@ void NGLScene::render()
   m_mouseGlobalTX.m_m[3][0] = m_modelPos.m_x;
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
-
-  // need to bind the active texture before drawing
-  glBindTexture(GL_TEXTURE_2D,m_textureName);
   glPolygonMode(GL_FRONT_AND_BACK,m_polyMode);
+  shader->setUniform("reflectOn",1);
 
   loadMatricesToShader();
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
@@ -268,6 +346,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_N : showNormal(); break;
   case Qt::Key_Left : previousPrim(); break;
   case Qt::Key_Right : nextPrim(); break;
+  case Qt::Key_D : m_debug^=true; break;
 
   default : break;
   }
@@ -279,9 +358,9 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 void NGLScene::nextPrim()
 {
 
-  if( ++m_primIndex >=6)
+  if( ++m_primIndex >=7)
   {
-    m_primIndex=6;
+    m_primIndex=7;
   }
 }
 

@@ -5,7 +5,9 @@
 #include <ngl/Colour.h>
 #include <ngl/Light.h>
 #include <ngl/Text.h>
+#include <ngl/Transformation.h>
 #include <QTime>
+#include "CubeMap.h"
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
 /// @brief this class inherits from the Qt OpenGLWindow and allows us to use NGL to draw OpenGL
@@ -139,10 +141,15 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief names of the primitives to draw
     //----------------------------------------------------------------------------------------------------------------------
-    const static std::string s_vboNames[7];
-
+    const static std::string s_vboNames[8];
+    CubeMap *m_cubeMap;
+    CubeMap *m_cubeMapDebug;
+    bool m_debug;
     void nextPrim();
     void previousPrim();
+    void createSkyBox();
+    ngl::VertexArrayObject *m_skybox;
+    ngl::Transformation m_transform;
 };
 
 
