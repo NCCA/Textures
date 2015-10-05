@@ -2,7 +2,7 @@
 #define CUBEMAP_H__
 
 #include <string>
-#include <ngl/Texture.h>
+#include <ngl/Image.h>
 
 class CubeMap
 {

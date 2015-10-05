@@ -3,24 +3,24 @@
 CubeMap::CubeMap(const std::string &_right, const std::string &_left, const std::string &_bottom, const std::string &_top, const std::string &_front, const std  ::string &_back)
 {
 	createCubeMap();
-	ngl::Texture t(_right);
-	GLuint width=t.getWidth();
-	GLuint height=t.getHeight();
-	GLuint format=t.getFormat();
+	ngl::Image t(_right);
+	GLuint width=t.width();
+	GLuint height=t.height();
+	GLuint format=t.format();
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
-	t.loadImage(_left);
+	t.load(_left);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
 
-	t.loadImage(_bottom);
+	t.load(_bottom);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
 
-	t.loadImage(_top);
+	t.load(_top);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
 
-	t.loadImage(_front);
+	t.load(_front);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
 
-	t.loadImage(_back);
+	t.load(_back);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -33,12 +33,10 @@ CubeMap::CubeMap(std::string *_names)
 	for(int i = 0; i < 6; i++)
 	{
 
-		ngl::Texture t(_names[i]);
-		GLuint width=t.getWidth();
-		GLuint height=t.getHeight();
-		GLuint format=t.getFormat();
-
-
+		ngl::Image t(_names[i]);
+		GLuint width=t.width();
+		GLuint height=t.height();
+		GLuint format=t.format();
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, t.getPixels());
 	}
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
