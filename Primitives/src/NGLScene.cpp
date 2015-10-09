@@ -44,9 +44,7 @@ NGLScene::NGLScene()
 
 NGLScene::~NGLScene()
 {
-  ngl::NGLInit *Init = ngl::NGLInit::instance();
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
-  Init->NGLQuit();
   // remove the texture now we are done
   glDeleteTextures(1,&m_textureName);
 

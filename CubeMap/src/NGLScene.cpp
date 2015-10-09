@@ -52,23 +52,24 @@ void NGLScene::createSkyBox()
 
 
    const static GLubyte indices[]=  {
-                                       0,1,5,0,4,5, // back
-                                       3,2,6,7,6,3, // front
-                                       0,1,2,3,2,0, // top
-                                       4,5,6,7,6,4, // bottom
-                                       0,3,4,4,7,3,
-                                       1,5,2,2,6,5
-                                    };
+                            0, 1, 2, 2, 1, 3,
+                            2, 3, 4, 4, 3, 5,
+                            4, 5, 6, 6, 5, 7,
+                            6, 7, 0, 0, 7, 1,
+                            1, 7, 3, 3, 7, 5,
+                            6, 0, 4, 4, 0, 2 };
 
-    GLfloat vertices[] = {-1,1,-1,
-                          1,1,-1,
-                          1,1,1,
-                          -1,1,1,
-                          -1,-1,-1,
-                          1,-1,-1,
-                          1,-1,1,
-                          -1,-1,1
+    GLfloat vertices[] = {-0.5f ,-0.5f ,0.5f,
+                          0.5f, -0.5f, 0.5f,
+                          -0.5f ,0.5f ,0.5f,
+                          0.5f ,0.5f ,0.5f,
+                          -0.5f ,0.5f ,-0.5f,
+                          0.5f ,0.5f ,-0.5f,
+                          -0.5f ,-0.5f ,-0.5f,
+                          0.5f ,-0.5f, -0.5f
                          };
+
+
 
     // in this case we are going to set our data as the vertices above
 
@@ -190,7 +191,7 @@ void NGLScene::paintGL()
 
   //render skybox without depth test
   glDisable(GL_DEPTH_TEST);
-  m_transform.setScale(25,25,25);
+  m_transform.setScale(45,45,45);
   // m_transform.setRotation(0,0,90);
    m_mouseGlobalTX.identity();
   loadMatricesToShader();
@@ -198,12 +199,11 @@ void NGLScene::paintGL()
     m_cubeMapDebug->enable();
   else
   m_cubeMap->enable();
-  //m_skybox->bind();
-  //m_skybox->draw();
-  //m_skybox->unbind();
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  shader->setUniform("reflectOn",0);
-  ngl::VAOPrimitives::instance()->draw("cube");
+  m_skybox->bind();
+  m_skybox->draw();
+  m_skybox->unbind();
+//  shader->setUniform("reflectOn",0);
   // now draw object
   glEnable(GL_DEPTH_TEST);
 //  glEnable(GL_CULL_FACE);

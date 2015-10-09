@@ -1,6 +1,5 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
-
 #include "NGLScene.h"
 #include <ngl/Camera.h>
 #include <ngl/Transformation.h>
@@ -29,7 +28,6 @@ NGLScene::NGLScene()
   m_spinXFace=0;
   m_spinYFace=0;
   setTitle("Simple OpenGL Texture");
-
   m_speed=0;
   m_repeat=1;
 
@@ -43,7 +41,7 @@ void NGLScene::loadTexture()
   {
     int width=image.width();
     int height=image.height();
-
+    // note this method is depracted as it uses the Older GLWidget but does work
     image = QGLWidget::convertToGLFormat(image);
 
     glGenTextures(1,&m_textureName);
