@@ -191,7 +191,7 @@ void NGLScene::paintGL()
 
   //render skybox without depth test
   glDisable(GL_DEPTH_TEST);
-  m_transform.setScale(45,45,45);
+  m_transform.setScale(5,5,5);
   // m_transform.setRotation(0,0,90);
    m_mouseGlobalTX.identity();
   loadMatricesToShader();

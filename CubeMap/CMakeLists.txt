@@ -8,8 +8,11 @@ include_directories(include $ENV{HOME}/NGL/include)
 #the file(GLOB...) allows for wildcard additions of our src dir
 set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp  
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
+			${PROJECT_SOURCE_DIR}/src/CubeMap.cpp  
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
+			${PROJECT_SOURCE_DIR}/include/CubeMap.h  
 )
+
 
 # see what platform we are on and set platform defines
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
