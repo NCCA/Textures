@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 # Name of the project
-set(PROJECT_NAME Primitives)
+set(PROJECT_NAME CubeMap)
 project(${PROJECT_NAME})
 #Bring the headers into the project (local ones)
 include_directories(include $ENV{HOME}/NGL/include)
@@ -8,10 +8,7 @@ include_directories(include $ENV{HOME}/NGL/include)
 #the file(GLOB...) allows for wildcard additions of our src dir
 set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp  
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
-			${PROJECT_SOURCE_DIR}/src/OpenGLWindow.cpp
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
-			${PROJECT_SOURCE_DIR}/include/OpenGLWindow.h
-
 )
 
 # see what platform we are on and set platform defines
