@@ -38,12 +38,12 @@ NGLScene::NGLScene()
 
 void NGLScene::loadTexture()
 {
-  QImage *image = new QImage();
-  bool loaded=image->load("textures/crate.bmp");
+  QImage image;
+  bool loaded=image.load("textures/crate.bmp");
   if(loaded == true)
   {
-    int width=image->width();
-    int height=image->height();
+    int width=image.width();
+    int height=image.height();
 
     unsigned char *data = new unsigned char[ width*height*3];
     unsigned int index=0;
@@ -52,7 +52,7 @@ void NGLScene::loadTexture()
     {
       for( int x=0; x<width; ++x)
       {
-        colour=image->pixel(x,y);
+        colour=image.pixel(x,y);
 
         data[index++]=qRed(colour);
         data[index++]=qGreen(colour);
@@ -141,13 +141,12 @@ NGLScene::~NGLScene()
   glDeleteTextures(1,&m_textureName);
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  // set the viewport for openGL
-  glViewport(0,0,_w,_h);
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45,(float)_w/_h,0.05,350);
-  update();
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 
@@ -168,10 +167,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,1,2);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam= new ngl::Camera(from,to,up);
+  m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(45,(float)720.0/576.0,0.5,150);
+  m_cam.setShape(45,(float)720.0/576.0,0.5,150);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -196,10 +195,8 @@ void NGLScene::initializeGL()
 
   createCube(0.2);
   loadTexture();
-  m_text = new ngl::Text(QFont("Arial",14));
+  m_text.reset( new ngl::Text(QFont("Arial",14)));
   m_text->setScreenSize(width(),height());
-  // as re-size is not explicitly called we need to do this.
-  glViewport(0,0,width(),height());
 
 
 }
@@ -209,7 +206,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_transform.getMatrix() *m_mouseGlobalTX*m_cam->getVPMatrix();
+  ngl::Mat4 MVP=m_transform.getMatrix() *m_mouseGlobalTX*m_cam.getVPMatrix();
 
   shader->setRegisteredUniform("MVP",MVP);
 }
@@ -218,8 +215,7 @@ void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- // build our transform stack
-  ngl::Transformation trans;
+  glViewport(0,0,m_width,m_height);
   // Rotation based on the mouse position for our global
   // transform
   ngl::Mat4 rotX;

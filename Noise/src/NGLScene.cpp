@@ -38,13 +38,12 @@ NGLScene::~NGLScene()
   glDeleteTextures(1,&m_textureName);
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  // set the viewport for openGL
-  glViewport(0,0,_w,_h);
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45,(float)_w/_h,0.05,350);
-  update();
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 void NGLScene::makeMarbleTexture(float amp, float strength)
@@ -127,10 +126,10 @@ void NGLScene::initializeGL()
     ngl::Vec3 from(0,1,2);
     ngl::Vec3 to(0,0,0);
     ngl::Vec3 up(0,1,0);
-    m_cam= new ngl::Camera(from,to,up);
+    m_cam.set(from,to,up);
     // set the shape using FOV 45 Aspect Ratio based on Width and Height
     // The final two are near and far clipping planes of 0.5 and 10
-    m_cam->setShape(45,(float)720.0/576.0,0.5,150);
+    m_cam.setShape(45,(float)720.0/576.0,0.5,150);
     // now to load the shader and set the values
     // grab an instance of shader manager
     ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -163,7 +162,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-   ngl::Mat4 MVP=m_mouseGlobalTX * m_cam->getVPMatrix();
+   ngl::Mat4 MVP=m_mouseGlobalTX * m_cam.getVPMatrix();
 
    shader->setShaderParamFromMat4("MVP",MVP);
 }
@@ -172,6 +171,7 @@ void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glViewport(0,0,m_width,m_height);
  // build our transform stack
   // Rotation based on the mouse position for our global
   // transform

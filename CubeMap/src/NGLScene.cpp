@@ -47,7 +47,7 @@ NGLScene::NGLScene()
 void NGLScene::createSkyBox()
 {
   // create a vao as a series of GL_TRIANGLES
-   m_skybox= ngl::VertexArrayObject::createVOA(GL_TRIANGLES);
+   m_skybox.reset( ngl::VertexArrayObject::createVOA(GL_TRIANGLES));
    m_skybox->bind();
 
 
@@ -86,18 +86,17 @@ void NGLScene::createSkyBox()
 NGLScene::~NGLScene()
 {
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
-  delete m_cubeMap;
-  delete m_cubeMapDebug;
 }
 
 
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  glViewport(0,0,_w,_h);
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45,(float)_w/_h,0.05,350);
-  update();
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
+
 }
 
 
@@ -118,10 +117,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,1,4);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam= new ngl::Camera(from,to,up);
+  m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(45,(float)720.0/576.0,0.1,350);
+  m_cam.setShape(45,(float)720.0/576.0,0.1,350);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -152,13 +151,13 @@ void NGLScene::initializeGL()
   prim->createTorus("torus",0.15,0.4,40,40);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
-  m_cubeMap = new CubeMap("textures/right.png","textures/left.png",
+  m_cubeMap.reset( new CubeMap("textures/right.png","textures/left.png",
                           "textures/bottom.png","textures/top.png",
-                          "textures/front.png","textures/back.png");
+                          "textures/front.png","textures/back.png") );
   std::string debug[6]={"textures/DebugRight.png","textures/DebugLeft.png",
                  "textures/DebugBottom.png","textures/DebugTop.png",
                  "textures/DebugFront.png","textures/DebugBack.png"};
-  m_cubeMapDebug = new CubeMap(debug);
+  m_cubeMapDebug.reset( new CubeMap(debug));
 
   createSkyBox();
 
@@ -170,22 +169,20 @@ void NGLScene::loadMatricesToShader()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["TextureShader"]->use();
   ngl::Mat4 M=m_mouseGlobalTX*m_transform.getMatrix();
-  ngl::Mat4 MVP=M*m_cam->getVPMatrix();
+  ngl::Mat4 MVP=M*m_cam.getVPMatrix();
   shader->setRegisteredUniform("MVP",MVP);
   shader->setRegisteredUniform("M",M);
   shader->setRegisteredUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
-  ngl::Mat3 normalMatrix=M*m_cam->getViewMatrix();
+  ngl::Mat3 normalMatrix=M*m_cam.getViewMatrix();
   normalMatrix.inverse();
   shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
-
-
 }
 
 void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  glViewport(0,0,m_width,m_height);
 
   // need to bind the active texture before drawing
 
