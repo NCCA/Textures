@@ -108,7 +108,6 @@ void NGLScene::initializeGL()
 
   shader->linkProgramObject("TextureShader");
   shader->use("TextureShader");
-  shader->registerUniform("TextureShader","MVP");
 
   ngl::Texture texture("textures/ratGrid.png");
   m_textureName=texture.setTextureGL();
