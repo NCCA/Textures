@@ -198,7 +198,6 @@ void NGLScene::initializeGL()
 
   shader->linkProgramObject("TextureShader");
   shader->use("TextureShader");
-  shader->registerUniform("TextureShader","MVP");
 
   createCube(0.2);
   loadTexture();
