@@ -60,7 +60,7 @@ void NGLScene::makeMarbleTexture(float amp, float strength)
   // pointer to the Texture data
   GLfloat *data;
   // size of the texture width
-  const static int MSIZE=128;
+  const static int MSIZE=255;
   // make room for the texture (only using Luminance value here)
   data = new GLfloat [MSIZE*MSIZE*MSIZE*3];
   // calc step size for S and T rangeing from 0.0 1.0

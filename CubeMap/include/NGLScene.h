@@ -1,10 +1,11 @@
-#ifndef NGLSCENE_H__
-#define NGLSCENE_H__
+#ifndef NGLSCENE_H_
+#define NGLSCENE_H_
 #include <ngl/Camera.h>
 #include <ngl/Colour.h>
 #include <ngl/Light.h>
 #include <ngl/Text.h>
 #include <ngl/Transformation.h>
+#include <ngl/VertexArrayObject.h>
 #include <QTime>
 #include <QOpenGLWindow>
 #include "CubeMap.h"

@@ -10,16 +10,17 @@
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
 #include <QFont>
+#include <memory>
 
 
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
-const static float INCREMENT=0.01;
+const static float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for the wheel zoom
 //----------------------------------------------------------------------------------------------------------------------
-const static float ZOOM=0.1;
+const static float ZOOM=0.1f;
 
 NGLScene::NGLScene()
 {
@@ -45,8 +46,8 @@ void NGLScene::loadTexture()
     int width=image.width();
     int height=image.height();
 
-    unsigned char *data = new unsigned char[ width*height*3];
-    unsigned int index=0;
+    std::unique_ptr<unsigned char []> data ( new unsigned char[ width*height*3]);
+    size_t index=0;
     QRgb colour;
     for( int y=0; y<height; ++y)
     {
@@ -66,7 +67,7 @@ void NGLScene::loadTexture()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
-  glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
+  glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data.get());
 
   glGenerateMipmap(GL_TEXTURE_2D); //  Allocate the mipmaps
 
@@ -123,12 +124,12 @@ void NGLScene::createCube( GLfloat _scale )
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
   // now we bind the vertex attribute pointer for this object in this case the
   // vertex data
-  glVertexAttribPointer(0,3,GL_FLOAT,false,0,0);
+  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
   glEnableVertexAttribArray(0);
   // now we repeat for the UV data using the second VBO
   glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(texture)*sizeof(GLfloat), texture, GL_STATIC_DRAW);
-  glVertexAttribPointer(1,2,GL_FLOAT,false,0,0);
+  glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,0,0);
   glEnableVertexAttribArray(1);
 
 }
@@ -141,13 +142,7 @@ NGLScene::~NGLScene()
   glDeleteTextures(1,&m_textureName);
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
-}
+
 
 void NGLScene::resizeGL(int _w , int _h)
 {
@@ -214,7 +209,7 @@ void NGLScene::loadMatricesToShader()
 
   ngl::Mat4 MVP=m_transform.getMatrix() *m_mouseGlobalTX*m_cam.getVPMatrix();
 
-  shader->setRegisteredUniform("MVP",MVP);
+  shader->setUniform("MVP",MVP);
 }
 
 void NGLScene::paintGL()
@@ -245,9 +240,9 @@ void NGLScene::paintGL()
   glBindTexture(GL_TEXTURE_2D,m_textureName);
   glPolygonMode(GL_FRONT_AND_BACK,m_polyMode);
 
-	for (float z=-14; z<15; z+=0.5)
+  for (float z=-34; z<35; z+=0.5)
 	{
-		for (float x=-14; x<15; x+=0.5)
+    for (float x=-34; x<35; x+=0.5)
 		{
 			m_transform.reset();
 			{
@@ -255,7 +250,7 @@ void NGLScene::paintGL()
 				m_transform.setPosition(x,0.49,z);
 				loadMatricesToShader();
 				++instances;
-				glDrawArrays(GL_TRIANGLES, 0,36 );	// draw object
+        glDrawArrays(GL_TRIANGLES, 0,36 );	// draw object
 			}
 	 }
 	}
