@@ -126,8 +126,8 @@ void NGLScene::initializeGL()
 
 
   // now pass the modelView and projection values to the shader
-  shader->setShaderParam1i("xMultiplyer",m_repeat);
-  shader->setShaderParam1f("yOffset",0.0);
+  shader->setUniform("xMultiplyer",m_repeat);
+  shader->setUniform("yOffset",0.0f);
 
   loadTexture();
   glEnable(GL_DEPTH_TEST); // for removal of hidden surfaces
@@ -147,7 +147,7 @@ void NGLScene::loadMatricesToShader()
 
   ngl::Mat4 MVP=m_mouseGlobalTX*m_cam.getVPMatrix();
 
-  shader->setShaderParamFromMat4("MVP",MVP);
+  shader->setUniform("MVP",MVP);
 
 }
 
@@ -173,7 +173,7 @@ void NGLScene::paintGL()
 	glBindTexture(GL_TEXTURE_2D,m_textureName);
 
 
-	shader->setShaderParam1i("xMultiplyer",m_repeat);
+	shader->setUniform("xMultiplyer",m_repeat);
 
 	// now we bind back our vertex array object and draw
 
@@ -307,7 +307,7 @@ void NGLScene::timerEvent(QTimerEvent *_event )
     offset+=m_speed;
     ngl::ShaderLib *shader=ngl::ShaderLib::instance();
     shader->use("TextureShader");
-    shader->setShaderParam1f("yOffset",offset);
+    shader->setUniform("yOffset",offset);
   }
   update();
 }

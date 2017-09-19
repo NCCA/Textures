@@ -5,6 +5,8 @@
 #include <ngl/Camera.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
+#include <ngl/VAOFactory.h>
+#include <ngl/SimpleIndexVAO.h>
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
 #include <ngl/NGLStream.h>
@@ -47,7 +49,7 @@ NGLScene::NGLScene()
 void NGLScene::createSkyBox()
 {
   // create a vao as a series of GL_TRIANGLES
-   m_skybox.reset( ngl::VertexArrayObject::createVOA(GL_TRIANGLES));
+   m_skybox.reset( ngl::VAOFactory::createVAO(ngl::simpleIndexVAO,GL_TRIANGLES));
    m_skybox->bind();
 
 
@@ -73,7 +75,7 @@ void NGLScene::createSkyBox()
 
     // in this case we are going to set our data as the vertices above
 
-    m_skybox->setIndexedData(24*sizeof(GLfloat),vertices[0],sizeof(indices),&indices[0],GL_UNSIGNED_BYTE,GL_STATIC_DRAW);
+    m_skybox->setData(ngl::SimpleIndexVAO::VertexData(24*sizeof(GLfloat),vertices[0],sizeof(indices),&indices[0],GL_UNSIGNED_BYTE,GL_STATIC_DRAW));
     // now we set the attribute pointer to be 0 (as this matches vertIn in our shader)
     m_skybox->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
     m_skybox->setNumIndices(sizeof(indices));
@@ -177,12 +179,12 @@ void NGLScene::loadMatricesToShader()
   (*shader)["TextureShader"]->use();
   ngl::Mat4 M=m_mouseGlobalTX*m_transform.getMatrix();
   ngl::Mat4 MVP=M*m_cam.getVPMatrix();
-  shader->setRegisteredUniform("MVP",MVP);
-  shader->setRegisteredUniform("M",M);
-  shader->setRegisteredUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("M",M);
+  shader->setUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
   ngl::Mat3 normalMatrix=M*m_cam.getViewMatrix();
   normalMatrix.inverse();
-  shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
+  shader->setUniform("normalMatrix",normalMatrix);
 }
 
 void NGLScene::paintGL()

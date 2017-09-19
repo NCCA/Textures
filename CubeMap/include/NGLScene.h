@@ -4,8 +4,8 @@
 #include <ngl/Colour.h>
 #include <ngl/Light.h>
 #include <ngl/Text.h>
+#include <ngl/AbstractVAO.h>
 #include <ngl/Transformation.h>
-#include <ngl/VertexArrayObject.h>
 #include <QTime>
 #include <QOpenGLWindow>
 #include "CubeMap.h"
@@ -156,7 +156,7 @@ private:
     void nextPrim();
     void previousPrim();
     void createSkyBox();
-    std::unique_ptr <ngl::VertexArrayObject> m_skybox;
+    std::unique_ptr <ngl::AbstractVAO> m_skybox;
     ngl::Transformation m_transform;
 };
 
