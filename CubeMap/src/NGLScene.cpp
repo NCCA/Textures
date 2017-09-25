@@ -177,13 +177,13 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["TextureShader"]->use();
-  ngl::Mat4 M=m_mouseGlobalTX*m_transform.getMatrix();
-  ngl::Mat4 MVP=M*m_cam.getVPMatrix();
+  ngl::Mat4 M=m_transform.getMatrix()*m_mouseGlobalTX;
+  ngl::Mat4 MVP=m_cam.getVPMatrix()*M;
   shader->setUniform("MVP",MVP);
   shader->setUniform("M",M);
   shader->setUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
   ngl::Mat3 normalMatrix=M*m_cam.getViewMatrix();
-  normalMatrix.inverse();
+  normalMatrix.inverse().transpose();
   shader->setUniform("normalMatrix",normalMatrix);
 }
 

@@ -145,7 +145,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_mouseGlobalTX*m_cam.getVPMatrix();
+  ngl::Mat4 MVP=m_cam.getVPMatrix()*m_mouseGlobalTX;
 
   shader->setUniform("MVP",MVP);
 
