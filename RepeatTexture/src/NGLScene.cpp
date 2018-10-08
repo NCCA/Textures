@@ -1,7 +1,6 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
 #include "NGLScene.h"
-#include <ngl/Camera.h>
 #include <ngl/Transformation.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
@@ -63,18 +62,9 @@ NGLScene::~NGLScene()
 }
 
 
-
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
-}
-
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_cam.setShape(45.0f,(float)_w/_h,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,(float)_w/_h,0.05f,350.0f);
   m_width=_w*devicePixelRatio();
   m_height=_h*devicePixelRatio();
 }
@@ -98,10 +88,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,1,2);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam.set(from,to,up);
+  m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(45,(float)720.0/576.0,0.5,160);
+  m_project=ngl::perspective(45,(float)720.0/576.0,0.5,160);
   // now to load the shader and set the values
   // grab an instance of shader manager
 
@@ -145,7 +135,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_cam.getVPMatrix()*m_mouseGlobalTX;
+  ngl::Mat4 MVP=m_project*m_view*m_mouseGlobalTX;
 
   shader->setUniform("MVP",MVP);
 
