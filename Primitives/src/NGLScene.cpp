@@ -2,7 +2,6 @@
 #include <QGuiApplication>
 
 #include "NGLScene.h"
-#include <ngl/Camera.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
@@ -22,11 +21,11 @@ const std::string NGLScene::s_vboNames[7]=
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
-const static float INCREMENT=0.01;
+const static float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for the wheel zoom
 //----------------------------------------------------------------------------------------------------------------------
-const static float ZOOM=0.1;
+const static float ZOOM=0.1f;
 
 NGLScene::NGLScene()
 {
@@ -57,12 +56,12 @@ void NGLScene::resizeGL(QResizeEvent *_event)
   m_width=_event->size().width()*devicePixelRatio();
   m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_cam.setShape(45.0f,(float)_w/_h,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,(float)_w/_h,0.05f,350.0f);
   m_width=_w*devicePixelRatio();
   m_height=_h*devicePixelRatio();
 }
@@ -84,10 +83,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,1,4);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam.set(from,to,up);
+  m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(45,(float)720.0/576.0,0.5,150);
+  m_project=ngl::perspective(45,(float)720.0/576.0,0.5,150);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -114,10 +113,10 @@ void NGLScene::initializeGL()
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
   prim->createSphere("sphere",1.0,40);
   prim->createCylinder("cylinder",0.5,5,30,30);
-  prim->createCone("cone",0.5,1.4,20,20);
+  prim->createCone("cone",0.5,1.4f,20,20);
   prim->createDisk("disk",0.5,40);
   prim->createTrianglePlane("plane",1,1,10,10,ngl::Vec3(0,1,0));
-  prim->createTorus("torus",0.15,0.4,40,40);
+  prim->createTorus("torus",0.15f,0.4f,40,40);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
 
@@ -129,7 +128,7 @@ void NGLScene::loadMatricesToShader()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["TextureShader"]->use();
 
-  ngl::Mat4 MVP=m_cam.getVPMatrix()*m_mouseGlobalTX;
+  ngl::Mat4 MVP=m_project*m_view*m_mouseGlobalTX;
 
   shader->setUniform("MVP",MVP);
 }

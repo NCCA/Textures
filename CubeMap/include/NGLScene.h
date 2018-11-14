@@ -1,8 +1,6 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
-#include <ngl/Camera.h>
-#include <ngl/Colour.h>
-#include <ngl/Light.h>
+#include <ngl/Mat4.h>
 #include <ngl/Text.h>
 #include <ngl/AbstractVAO.h>
 #include <ngl/Transformation.h>
@@ -97,7 +95,8 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief Our Camera
     //----------------------------------------------------------------------------------------------------------------------
-    ngl::Camera m_cam;
+    ngl::Mat4 m_view;
+    ngl::Mat4 m_project;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief used to store the global mouse transforms
     //----------------------------------------------------------------------------------------------------------------------

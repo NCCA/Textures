@@ -1,5 +1,5 @@
-#ifndef CUBEMAP_H__
-#define CUBEMAP_H__
+#ifndef CUBEMAP_H_
+#define CUBEMAP_H_
 
 #include <string>
 #include <ngl/Image.h>

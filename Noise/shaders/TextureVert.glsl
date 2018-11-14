@@ -4,8 +4,9 @@
 uniform mat4 MVP;
 // first attribute the vertex values from our VAO
 layout (location=0) in vec3 inVert;
+layout(location=1) in vec3 inNorm;
 // second attribute the UV values from our VAO
-layout (location=1)in vec2 inUV;
+layout (location=2)in vec2 inUV;
 // we use this to pass the UV values to the frag shader
 out vec3 vertUV;
 
@@ -16,5 +17,5 @@ void main()
 // calculate the vertex position
 gl_Position = MVP*vec4(inVert, 1.0);
 // pass the UV values to the frag shader
-vertUV=vec3(inUV.st,inVert.y);
+vertUV=vec3(inUV.st,inNorm.z);
 }

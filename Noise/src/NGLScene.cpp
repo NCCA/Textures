@@ -3,23 +3,20 @@
 
 #include "Noise.h"
 #include "NGLScene.h"
-#include <ngl/Camera.h>
-#include <ngl/Light.h>
 #include <ngl/Transformation.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
-
+#include <memory>
 
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
-const static float INCREMENT=0.01;
+const static float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for the wheel zoom
 //----------------------------------------------------------------------------------------------------------------------
-const static float ZOOM=0.1;
+const static float ZOOM=0.1f;
 
 NGLScene::NGLScene()
 {
@@ -38,17 +35,10 @@ NGLScene::~NGLScene()
   glDeleteTextures(1,&m_textureName);
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
-}
 
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_cam.setShape(45.0f,(float)_w/_h,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,(float)_w/_h,0.05f,350.0f);
   m_width=_w*devicePixelRatio();
   m_height=_h*devicePixelRatio();
 }
@@ -57,17 +47,16 @@ void NGLScene::makeMarbleTexture(float amp, float strength)
 {
   // create a new instance of the noise class (which also creates the lattice noise tables)
   Noise *n = new Noise();
-  // pointer to the Texture data
-  GLfloat *data;
   // size of the texture width
   const static int MSIZE=255;
+  // pointer to the Texture data
+  std::unique_ptr<GLfloat []> data=std::make_unique<GLfloat []>(MSIZE*MSIZE*MSIZE*3);
   // make room for the texture (only using Luminance value here)
-  data = new GLfloat [MSIZE*MSIZE*MSIZE*3];
   // calc step size for S and T rangeing from 0.0 1.0
-  float step=1.0/(float)MSIZE;
-  float S=0.0;
-  float T=0.0;
-  float U=0.0;
+  float step=1.0f/(float)MSIZE;
+  float S=0.0f;
+  float T=0.0f;
+  float U=0.0f;
   // create index into data set
   unsigned int index=0;
   // loop for width and height for the texture to create
@@ -103,12 +92,11 @@ void NGLScene::makeMarbleTexture(float amp, float strength)
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
-  glTexImage3D(GL_TEXTURE_3D,0,GL_RGB,MSIZE,MSIZE,MSIZE,0,GL_RGB,GL_FLOAT,data);
+  glTexImage3D(GL_TEXTURE_3D,0,GL_RGB,MSIZE,MSIZE,MSIZE,0,GL_RGB,GL_FLOAT,data.get());
   glGenerateMipmap(GL_TEXTURE_3D); //  Allocate the mipmaps
   //  Allocate the mipmaps
-  std::cout <<"done texture"<<std::endl;
+  std::cout <<"done texture\n";
   // remove the Data
-  delete [] data;
   // return the id of the texture object
 }
 
@@ -133,10 +121,10 @@ void NGLScene::initializeGL()
     ngl::Vec3 from(0,1,2);
     ngl::Vec3 to(0,0,0);
     ngl::Vec3 up(0,1,0);
-    m_cam.set(from,to,up);
+    m_view=ngl::lookAt(from,to,up);
     // set the shape using FOV 45 Aspect Ratio based on Width and Height
     // The final two are near and far clipping planes of 0.5 and 10
-    m_cam.setShape(45,(float)720.0/576.0,0.5,150);
+    m_project=ngl::perspective(45,(float)720.0/576.0,0.5,150);
     // now to load the shader and set the values
     // grab an instance of shader manager
     ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -169,7 +157,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-   ngl::Mat4 MVP=m_cam.getVPMatrix()*m_mouseGlobalTX;
+   ngl::Mat4 MVP=m_project*m_view*m_mouseGlobalTX;
 
    shader->setUniform("MVP",MVP);
 }

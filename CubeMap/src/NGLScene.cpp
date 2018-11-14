@@ -2,7 +2,6 @@
 #include <QGuiApplication>
 
 #include "NGLScene.h"
-#include <ngl/Camera.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/VAOFactory.h>
@@ -26,11 +25,11 @@ const std::string NGLScene::s_vboNames[8]=
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
-const static float INCREMENT=0.01;
+const static float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for the wheel zoom
 //----------------------------------------------------------------------------------------------------------------------
-const static float ZOOM=0.1;
+const static float ZOOM=0.1f;
 
 NGLScene::NGLScene()
 {
@@ -49,7 +48,7 @@ NGLScene::NGLScene()
 void NGLScene::createSkyBox()
 {
   // create a vao as a series of GL_TRIANGLES
-   m_skybox.reset( ngl::VAOFactory::createVAO(ngl::simpleIndexVAO,GL_TRIANGLES));
+   m_skybox=ngl::VAOFactory::createVAO(ngl::simpleIndexVAO,GL_TRIANGLES);
    m_skybox->bind();
 
 
@@ -97,12 +96,12 @@ void NGLScene::resizeGL(QResizeEvent *_event)
   m_width=_event->size().width()*devicePixelRatio();
   m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_cam.setShape(45.0f,(float)_w/_h,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,(float)_w/_h,0.05f,350.0f);
   m_width=_w*devicePixelRatio();
   m_height=_h*devicePixelRatio();
 }
@@ -126,10 +125,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,1,4);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam.set(from,to,up);
+  m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(45,(float)720.0/576.0,0.1,350);
+  m_project=ngl::perspective(45,(float)720.0/576.0,0.1,350);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -178,11 +177,11 @@ void NGLScene::loadMatricesToShader()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["TextureShader"]->use();
   ngl::Mat4 M=m_transform.getMatrix()*m_mouseGlobalTX;
-  ngl::Mat4 MVP=m_cam.getVPMatrix()*M;
+  ngl::Mat4 MVP=m_project*m_view*M;
   shader->setUniform("MVP",MVP);
   shader->setUniform("M",M);
   shader->setUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
-  ngl::Mat3 normalMatrix=M*m_cam.getViewMatrix();
+  ngl::Mat3 normalMatrix=m_view*M;
   normalMatrix.inverse().transpose();
   shader->setUniform("normalMatrix",normalMatrix);
 }
