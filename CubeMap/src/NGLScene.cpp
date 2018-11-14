@@ -91,14 +91,6 @@ NGLScene::~NGLScene()
 
 
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_project=ngl::perspective(45.0f,(float)width()/height(),0.05f,350.0f);
-}
-
 void NGLScene::resizeGL(int _w , int _h)
 {
   m_project=ngl::perspective(45.0f,(float)_w/_h,0.05f,350.0f);
@@ -208,7 +200,7 @@ void NGLScene::paintGL()
   m_skybox->bind();
   m_skybox->draw();
   m_skybox->unbind();
-//  shader->setUniform("reflectOn",0);
+  shader->setUniform("reflectOn",0);
   // now draw object
   glEnable(GL_DEPTH_TEST);
 //  glEnable(GL_CULL_FACE);

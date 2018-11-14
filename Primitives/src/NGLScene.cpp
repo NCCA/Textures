@@ -51,6 +51,7 @@ NGLScene::~NGLScene()
 
 
 
+<<<<<<< HEAD
 void NGLScene::resizeGL(QResizeEvent *_event)
 {
   m_width=_event->size().width()*devicePixelRatio();
@@ -58,6 +59,8 @@ void NGLScene::resizeGL(QResizeEvent *_event)
   // now set the camera size values as the screen size has changed
   m_project=ngl::perspective(45.0f,(float)width()/height(),0.05f,350.0f);
 }
+=======
+>>>>>>> fc0c5b25951ad299cbf13d30dbbf3362a9b60dc4
 
 void NGLScene::resizeGL(int _w , int _h)
 {

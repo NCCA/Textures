@@ -61,10 +61,6 @@ NGLScene::~NGLScene()
   glDeleteTextures(1,&m_textureName);
 }
 
-
-
-
-
 void NGLScene::resizeGL(int _w , int _h)
 {
   m_project=ngl::perspective(45.0f,(float)_w/_h,0.05f,350.0f);
