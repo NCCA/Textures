@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
 #include <ngl/Mat4.h>
 #include <ngl/Vec3.h>
-=======
-#ifndef NGLSCENE_H__
-#define NGLSCENE_H__
-#include <ngl/Vec3.h>
-#include <ngl/Mat4.h>
->>>>>>> fc0c5b25951ad299cbf13d30dbbf3362a9b60dc4
 #include <ngl/Text.h>
 #include <QTime>
 #include <QOpenGLWindow>
@@ -38,20 +31,20 @@ class NGLScene : public QOpenGLWindow
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief dtor must close down ngl and release OpenGL resources
     //----------------------------------------------------------------------------------------------------------------------
-    ~NGLScene();
+    ~NGLScene() override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief the initialize class is called once when the window is created and we have a valid GL context
     /// use this to setup any default GL stuff
     //----------------------------------------------------------------------------------------------------------------------
-    void initializeGL();
+    void initializeGL()  override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this is called everytime we want to draw the scene
     //----------------------------------------------------------------------------------------------------------------------
-    void paintGL();
+    void paintGL() override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this is called everytime we resize
     //----------------------------------------------------------------------------------------------------------------------
-    void resizeGL(int _w, int _h);
+    void resizeGL(int _w, int _h) override;
 
 private:
     //----------------------------------------------------------------------------------------------------------------------
@@ -115,30 +108,30 @@ private:
     /// @brief Qt Event called when a key is pressed
     /// @param [in] _event the Qt event to query for size etc
     //----------------------------------------------------------------------------------------------------------------------
-    void keyPressEvent(QKeyEvent *_event);
+    void keyPressEvent(QKeyEvent *_event) override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this method is called every time a mouse is moved
     /// @param _event the Qt Event structure
     //----------------------------------------------------------------------------------------------------------------------
-    void mouseMoveEvent (QMouseEvent * _event );
+    void mouseMoveEvent (QMouseEvent * _event ) override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this method is called everytime the mouse button is pressed
     /// inherited from QObject and overridden here.
     /// @param _event the Qt Event structure
     //----------------------------------------------------------------------------------------------------------------------
-    void mousePressEvent ( QMouseEvent *_event);
+    void mousePressEvent ( QMouseEvent *_event) override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this method is called everytime the mouse button is released
     /// inherited from QObject and overridden here.
     /// @param _event the Qt Event structure
     //----------------------------------------------------------------------------------------------------------------------
-    void mouseReleaseEvent ( QMouseEvent *_event );
+    void mouseReleaseEvent ( QMouseEvent *_event ) override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this method is called everytime the mouse wheel is moved
     /// inherited from QObject and overridden here.
     /// @param _event the Qt Event structure
     //----------------------------------------------------------------------------------------------------------------------
-    void wheelEvent( QWheelEvent *_event);
+    void wheelEvent( QWheelEvent *_event) override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief opengl texture id for the crate texture
     //----------------------------------------------------------------------------------------------------------------------
@@ -151,11 +144,6 @@ private:
     /// @brief the index of the primitive to draw
     //----------------------------------------------------------------------------------------------------------------------
     int m_primIndex;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief names of the primitives to draw
-    //----------------------------------------------------------------------------------------------------------------------
-    const static std::string s_vboNames[7];
-
     void nextPrim();
     void previousPrim();
 };

@@ -1,10 +1,7 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
 #include <ngl/Vec3.h>
-<<<<<<< HEAD
 #include <ngl/Mat4.h>
-=======
->>>>>>> fc0c5b25951ad299cbf13d30dbbf3362a9b60dc4
 #include <ngl/Text.h>
 #include <QOpenGLWindow>
 #include <memory>

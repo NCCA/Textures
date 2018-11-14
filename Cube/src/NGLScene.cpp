@@ -163,11 +163,7 @@ void NGLScene::initializeGL()
   // Now we will create a basic Camera from the graphics library
   // This is a static camera so it only needs to be set once
   // First create Values for the camera position
-<<<<<<< HEAD
   ngl::Vec3 from(0,2,4);
-=======
-  ngl::Vec3 from(0,1,4);
->>>>>>> fc0c5b25951ad299cbf13d30dbbf3362a9b60dc4
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
   m_view=ngl::lookAt(from,to,up);

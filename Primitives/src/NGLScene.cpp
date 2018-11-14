@@ -7,9 +7,12 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
 #include <QFont>
+#include <array>
 
-const std::string NGLScene::s_vboNames[7]=
-{
+//----------------------------------------------------------------------------------------------------------------------
+/// @brief names of the primitives to draw
+//----------------------------------------------------------------------------------------------------------------------
+const std::array<std::string,7> s_vboNames={
   "sphere",
   "cylinder",
   "cone",
@@ -18,6 +21,7 @@ const std::string NGLScene::s_vboNames[7]=
   "torus",
   "teapot",
 };
+
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
@@ -49,18 +53,6 @@ NGLScene::~NGLScene()
 
 }
 
-
-
-<<<<<<< HEAD
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_project=ngl::perspective(45.0f,(float)width()/height(),0.05f,350.0f);
-}
-=======
->>>>>>> fc0c5b25951ad299cbf13d30dbbf3362a9b60dc4
 
 void NGLScene::resizeGL(int _w , int _h)
 {
