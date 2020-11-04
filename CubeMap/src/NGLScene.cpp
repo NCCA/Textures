@@ -9,7 +9,6 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
 #include <ngl/NGLStream.h>
-#include <QFont>
 
 const std::string NGLScene::s_vboNames[8]=
 {
@@ -104,7 +103,7 @@ void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
 
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
@@ -121,34 +120,31 @@ void NGLScene::initializeGL()
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
   m_project=ngl::perspective(45,(float)720.0/576.0,0.1,350);
-  // now to load the shader and set the values
-  // grab an instance of shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
+  
   // load a frag and vert shaders
 
-  shader->createShaderProgram("TextureShader");
+  ngl::ShaderLib::createShaderProgram("TextureShader");
 
-  shader->attachShader("TextureVertex",ngl::ShaderType::VERTEX);
-  shader->attachShader("TextureFragment",ngl::ShaderType::FRAGMENT);
-  shader->loadShaderSource("TextureVertex","shaders/TextureVert.glsl");
-  shader->loadShaderSource("TextureFragment","shaders/TextureFrag.glsl");
+  ngl::ShaderLib::attachShader("TextureVertex",ngl::ShaderType::VERTEX);
+  ngl::ShaderLib::attachShader("TextureFragment",ngl::ShaderType::FRAGMENT);
+  ngl::ShaderLib::loadShaderSource("TextureVertex","shaders/TextureVert.glsl");
+  ngl::ShaderLib::loadShaderSource("TextureFragment","shaders/TextureFrag.glsl");
 
-  shader->compileShader("TextureVertex");
-  shader->compileShader("TextureFragment");
-  shader->attachShaderToProgram("TextureShader","TextureVertex");
-  shader->attachShaderToProgram("TextureShader","TextureFragment");
+  ngl::ShaderLib::compileShader("TextureVertex");
+  ngl::ShaderLib::compileShader("TextureFragment");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","TextureVertex");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","TextureFragment");
 
 
-  shader->linkProgramObject("TextureShader");
-  shader->use("TextureShader");
-  shader->autoRegisterUniforms("TextureShader");
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  prim->createSphere("sphere",1.0,40);
-  prim->createCylinder("cylinder",0.5,5,30,30);
-  prim->createCone("cone",0.5,1.4,20,20);
-  prim->createDisk("disk",0.5,40);
-  prim->createTrianglePlane("plane",1,1,10,10,ngl::Vec3(0,1,0));
-  prim->createTorus("torus",0.15,0.4,40,40);
+  ngl::ShaderLib::linkProgramObject("TextureShader");
+  ngl::ShaderLib::use("TextureShader");
+  ngl::ShaderLib::autoRegisterUniforms("TextureShader");
+  ngl::VAOPrimitives::createSphere("sphere",1.0,40);
+  ngl::VAOPrimitives::createCylinder("cylinder",0.5,5,30,30);
+  ngl::VAOPrimitives::createCone("cone",0.5,1.4,20,20);
+  ngl::VAOPrimitives::createDisk("disk",0.5,40);
+  ngl::VAOPrimitives::createTrianglePlane("plane",1,1,10,10,ngl::Vec3(0,1,0));
+  ngl::VAOPrimitives::createTorus("torus",0.15,0.4,40,40);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
   m_cubeMap.reset( new CubeMap("textures/right.png","textures/left.png",
@@ -166,16 +162,15 @@ void NGLScene::initializeGL()
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["TextureShader"]->use();
+  ngl::ShaderLib::use("TextureShader");
   ngl::Mat4 M=m_transform.getMatrix()*m_mouseGlobalTX;
   ngl::Mat4 MVP=m_project*m_view*M;
-  shader->setUniform("MVP",MVP);
-  shader->setUniform("M",M);
-  shader->setUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
+  ngl::ShaderLib::setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("M",M);
+  ngl::ShaderLib::setUniform("cameraPos",ngl::Vec3(M.openGL()[12],M.openGL()[13],M.openGL()[14]));
   ngl::Mat3 normalMatrix=m_view*M;
   normalMatrix.inverse().transpose();
-  shader->setUniform("normalMatrix",normalMatrix);
+  ngl::ShaderLib::setUniform("normalMatrix",normalMatrix);
 }
 
 void NGLScene::paintGL()
@@ -196,11 +191,10 @@ void NGLScene::paintGL()
     m_cubeMapDebug->enable();
   else
   m_cubeMap->enable();
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   m_skybox->bind();
   m_skybox->draw();
   m_skybox->unbind();
-  shader->setUniform("reflectOn",0);
+  ngl::ShaderLib::setUniform("reflectOn",0);
   // now draw object
   glEnable(GL_DEPTH_TEST);
 //  glEnable(GL_CULL_FACE);
@@ -220,11 +214,10 @@ void NGLScene::paintGL()
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
   glPolygonMode(GL_FRONT_AND_BACK,m_polyMode);
-  shader->setUniform("reflectOn",1);
+  ngl::ShaderLib::setUniform("reflectOn",1);
 
   loadMatricesToShader();
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  prim->draw(s_vboNames[m_primIndex]);
+  ngl::VAOPrimitives::draw(s_vboNames[m_primIndex]);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

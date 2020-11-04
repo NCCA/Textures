@@ -46,7 +46,7 @@ void NGLScene::resizeGL(int _w , int _h)
 void NGLScene::makeMarbleTexture(float amp, float strength)
 {
   // create a new instance of the noise class (which also creates the lattice noise tables)
-  Noise *n = new Noise();
+  std::unique_ptr<Noise> n = std::make_unique<Noise>();
   // size of the texture width
   const static int MSIZE=255;
   // pointer to the Texture data
@@ -105,7 +105,7 @@ void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
 
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
@@ -113,53 +113,45 @@ void NGLScene::initializeGL()
   // enable multisampling for smoother drawing
   glEnable(GL_MULTISAMPLE);
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
-   // enable depth testing for drawing
-    glEnable(GL_DEPTH_TEST);
-    // Now we will create a basic Camera from the graphics library
-    // This is a static camera so it only needs to be set once
-    // First create Values for the camera position
-    ngl::Vec3 from(0,1,2);
-    ngl::Vec3 to(0,0,0);
-    ngl::Vec3 up(0,1,0);
-    m_view=ngl::lookAt(from,to,up);
-    // set the shape using FOV 45 Aspect Ratio based on Width and Height
-    // The final two are near and far clipping planes of 0.5 and 10
-    m_project=ngl::perspective(45,(float)720.0/576.0,0.5,150);
-    // now to load the shader and set the values
-    // grab an instance of shader manager
-    ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-    // load a frag and vert shaders
-    makeMarbleTexture(0.00007f,18.0);
+  // Now we will create a basic Camera from the graphics library
+  // This is a static camera so it only needs to be set once
+  // First create Values for the camera position
+  ngl::Vec3 from(0,1,2);
+  ngl::Vec3 to(0,0,0);
+  ngl::Vec3 up(0,1,0);
+  m_view=ngl::lookAt(from,to,up);
+  // set the shape using FOV 45 Aspect Ratio based on Width and Height
+  // The final two are near and far clipping planes of 0.5 and 10
+  m_project=ngl::perspective(45,(float)720.0/576.0,0.5,150);
+  // load a frag and vert shaders
+  makeMarbleTexture(0.00007f,18.0);
 
-   shader->createShaderProgram("TextureShader");
+  ngl::ShaderLib::createShaderProgram("TextureShader");
 
-   shader->attachShader("TextureVertex",ngl::ShaderType::VERTEX);
-   shader->attachShader("TextureFragment",ngl::ShaderType::FRAGMENT);
-   shader->loadShaderSource("TextureVertex","shaders/TextureVert.glsl");
-   shader->loadShaderSource("TextureFragment","shaders/TextureFrag.glsl");
+  ngl::ShaderLib::attachShader("TextureVertex",ngl::ShaderType::VERTEX);
+  ngl::ShaderLib::attachShader("TextureFragment",ngl::ShaderType::FRAGMENT);
+  ngl::ShaderLib::loadShaderSource("TextureVertex","shaders/TextureVert.glsl");
+  ngl::ShaderLib::loadShaderSource("TextureFragment","shaders/TextureFrag.glsl");
 
-   shader->compileShader("TextureVertex");
-   shader->compileShader("TextureFragment");
-   shader->attachShaderToProgram("TextureShader","TextureVertex");
-   shader->attachShaderToProgram("TextureShader","TextureFragment");
+  ngl::ShaderLib::compileShader("TextureVertex");
+  ngl::ShaderLib::compileShader("TextureFragment");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","TextureVertex");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","TextureFragment");
 
 
 
-   shader->linkProgramObject("TextureShader");
-   shader->use("TextureShader");
-   // as re-size is not explicitly called we need to do this.
-   glViewport(0,0,width(),height());
+  ngl::ShaderLib::linkProgramObject("TextureShader");
+  ngl::ShaderLib::use("TextureShader");
+  // as re-size is not explicitly called we need to do this.
+  glViewport(0,0,width(),height());
 
 
 }
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-
    ngl::Mat4 MVP=m_project*m_view*m_mouseGlobalTX;
-
-   shader->setUniform("MVP",MVP);
+   ngl::ShaderLib::setUniform("MVP",MVP);
 }
 
 void NGLScene::paintGL()
@@ -182,13 +174,10 @@ void NGLScene::paintGL()
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
 
-	ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-	(*shader)["TextureShader"]->use();
+	ngl::ShaderLib::use("TextureShader");
 	loadMatricesToShader();
 	glBindTexture(GL_TEXTURE_3D,m_textureName);
-
-	ngl::VAOPrimitives *prim =  ngl::VAOPrimitives::instance();
-	prim->draw("teapot");
+	ngl::VAOPrimitives::draw("teapot");
 
 }
 

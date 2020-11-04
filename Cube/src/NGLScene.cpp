@@ -1,13 +1,12 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
-
 #include "NGLScene.h"
 #include <ngl/Transformation.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
-#include <QFont>
 #include <memory>
+#include <string>
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -43,7 +42,7 @@ void NGLScene::loadTexture()
     int width=image.width();
     int height=image.height();
 
-    std::unique_ptr<unsigned char []> data ( new unsigned char[ width*height*3]);
+    std::unique_ptr<unsigned char []> data = std::make_unique<unsigned char []>( width*height*3);
     size_t index=0;
     QRgb colour;
     for( int y=0; y<height; ++y)
@@ -153,7 +152,7 @@ void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
 
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
@@ -170,45 +169,39 @@ void NGLScene::initializeGL()
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
   m_project=ngl::perspective(45,(float)720.0/576.0,0.5,150);
-  // now to load the shader and set the values
-  // grab an instance of shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   // load a frag and vert shaders
 
-  shader->createShaderProgram("TextureShader");
+  ngl::ShaderLib::createShaderProgram("TextureShader");
 
-  shader->attachShader("SimpleVertex",ngl::ShaderType::VERTEX);
-  shader->attachShader("SimpleFragment",ngl::ShaderType::FRAGMENT);
-  shader->loadShaderSource("SimpleVertex","shaders/TextureVert.glsl");
-  shader->loadShaderSource("SimpleFragment","shaders/TextureFrag.glsl");
+  ngl::ShaderLib::attachShader("SimpleVertex",ngl::ShaderType::VERTEX);
+  ngl::ShaderLib::attachShader("SimpleFragment",ngl::ShaderType::FRAGMENT);
+  ngl::ShaderLib::loadShaderSource("SimpleVertex","shaders/TextureVert.glsl");
+  ngl::ShaderLib::loadShaderSource("SimpleFragment","shaders/TextureFrag.glsl");
 
-  shader->compileShader("SimpleVertex");
-  shader->compileShader("SimpleFragment");
-  shader->attachShaderToProgram("TextureShader","SimpleVertex");
-  shader->attachShaderToProgram("TextureShader","SimpleFragment");
+  ngl::ShaderLib::compileShader("SimpleVertex");
+  ngl::ShaderLib::compileShader("SimpleFragment");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","SimpleVertex");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","SimpleFragment");
 
 
-  shader->linkProgramObject("TextureShader");
-  shader->use("TextureShader");
+  ngl::ShaderLib::linkProgramObject("TextureShader");
+  ngl::ShaderLib::use("TextureShader");
 
   createCube(0.2);
   loadTexture();
-  m_text.reset( new ngl::Text(QFont("Arial",14)));
+  m_text=std::make_unique< ngl::Text>("fonts/Arial.ttf",14);
   m_text->setScreenSize(width(),height());
-
 
 }
 
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-
   ngl::Mat4 MVP=m_project * m_view *
                 m_mouseGlobalTX*
                 m_transform.getMatrix();
 
-  shader->setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("MVP",MVP);
 }
 
 void NGLScene::paintGL()
@@ -229,8 +222,8 @@ void NGLScene::paintGL()
   m_mouseGlobalTX.m_m[3][0] = m_modelPos.m_x;
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["TextureShader"]->use();
+  
+  ngl::ShaderLib::use("TextureShader");
   // now we bind back our vertex array object and draw
   glBindVertexArray(m_vaoID);		// select first VAO
 
@@ -257,8 +250,7 @@ void NGLScene::paintGL()
 	++m_frames;
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 	m_text->setColour(1,1,0);
-	QString text=QString("Texture and Vertex Array Object %1 instances Demo %2 fps").arg(instances).arg(m_fps);
-	m_text->renderText(10,20,text);
+	m_text->renderText(10,700,fmt::format("Texture and Vertex Array Object {} instances Demo {} fps",instances,m_fps));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

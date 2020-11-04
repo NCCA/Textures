@@ -7,8 +7,6 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
 #include <QGLWidget>
-#include <QFont>
-
 
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
@@ -73,7 +71,7 @@ void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
 
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
@@ -92,36 +90,32 @@ void NGLScene::initializeGL()
   // The final two are near and far clipping planes of 0.5 and 10
   m_project=ngl::perspective(45,(float)720.0/576.0,0.5,160);
   // now to load the shader and set the values
-  // grab an instance of shader manager
-
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   // load a frag and vert shaders
 
-  shader->createShaderProgram("TextureShader");
+  ngl::ShaderLib::createShaderProgram("TextureShader");
 
-  shader->attachShader("SimpleVertex",ngl::ShaderType::VERTEX);
-  shader->attachShader("SimpleFragment",ngl::ShaderType::FRAGMENT);
-  shader->loadShaderSource("SimpleVertex","shaders/TextureVert.glsl");
-  shader->loadShaderSource("SimpleFragment","shaders/TextureFrag.glsl");
+  ngl::ShaderLib::attachShader("SimpleVertex",ngl::ShaderType::VERTEX);
+  ngl::ShaderLib::attachShader("SimpleFragment",ngl::ShaderType::FRAGMENT);
+  ngl::ShaderLib::loadShaderSource("SimpleVertex","shaders/TextureVert.glsl");
+  ngl::ShaderLib::loadShaderSource("SimpleFragment","shaders/TextureFrag.glsl");
 
-  shader->compileShader("SimpleVertex");
-  shader->compileShader("SimpleFragment");
-  shader->attachShaderToProgram("TextureShader","SimpleVertex");
-  shader->attachShaderToProgram("TextureShader","SimpleFragment");
+  ngl::ShaderLib::compileShader("SimpleVertex");
+  ngl::ShaderLib::compileShader("SimpleFragment");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","SimpleVertex");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","SimpleFragment");
 
 
-  shader->linkProgramObject("TextureShader");
-  shader->use("TextureShader");
+  ngl::ShaderLib::linkProgramObject("TextureShader");
+  ngl::ShaderLib::use("TextureShader");
 
 
   // now pass the modelView and projection values to the shader
-  shader->setUniform("xMultiplyer",m_repeat);
-  shader->setUniform("yOffset",0.0f);
+  ngl::ShaderLib::setUniform("xMultiplyer",m_repeat);
+  ngl::ShaderLib::setUniform("yOffset",0.0f);
 
   loadTexture();
   glEnable(GL_DEPTH_TEST); // for removal of hidden surfaces
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  prim->createTrianglePlane("plane",10,10,20,20,ngl::Vec3(0,1,0));
+  ngl::VAOPrimitives::createTrianglePlane("plane",10,10,20,20,ngl::Vec3(0,1,0));
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
   // timer needs starting after gl context created
@@ -132,11 +126,9 @@ void NGLScene::initializeGL()
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
   ngl::Mat4 MVP=m_project*m_view*m_mouseGlobalTX;
-
-  shader->setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("MVP",MVP);
 
 }
 
@@ -157,18 +149,16 @@ void NGLScene::paintGL()
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
 
-	ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-	(*shader)["TextureShader"]->use();
+	ngl::ShaderLib::use("TextureShader");
 	glBindTexture(GL_TEXTURE_2D,m_textureName);
 
 
-	shader->setUniform("xMultiplyer",m_repeat);
+	ngl::ShaderLib::setUniform("xMultiplyer",m_repeat);
 
 	// now we bind back our vertex array object and draw
 
   loadMatricesToShader();
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  prim->draw("plane");
+  ngl::VAOPrimitives::draw("plane");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -294,9 +284,8 @@ void NGLScene::timerEvent(QTimerEvent *_event )
 		static float offset=0.0;
 
     offset+=m_speed;
-    ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-    shader->use("TextureShader");
-    shader->setUniform("yOffset",offset);
+    ngl::ShaderLib::use("TextureShader");
+    ngl::ShaderLib::setUniform("yOffset",offset);
   }
   update();
 }

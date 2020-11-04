@@ -11,7 +11,6 @@
 #include <time.h>
 #include <ngl/Types.h>
 #include <ngl/Vec3.h>
-#include <ngl/Random.h>
 class Noise
 {
 public :
@@ -29,8 +28,8 @@ public :
 
 private :
 
-  float *noiseTable;
-	unsigned char * index;
+  std::unique_ptr<float []> m_noiseTable;
+	std::array<unsigned char ,256> m_index;
 	GLfloat latticeNoise(int i, int j, int k);
 
 
