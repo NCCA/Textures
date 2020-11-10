@@ -150,8 +150,8 @@ private:
     float m_speed;
     int m_repeat;
 
-		inline void incrementSpeed(){m_speed+=0.01;}
-		inline void decrementSpeed(){m_speed-=0.01;}
+		inline void incrementSpeed(){m_speed+=0.01f;}
+		inline void decrementSpeed(){m_speed-=0.01f;}
 		inline void incrementRepeat(){++m_repeat;}
 		inline void decrementRepeat(){--m_repeat;}
 

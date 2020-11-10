@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <numeric>
 #include <ngl/Random.h>
 
 GLfloat Noise::sqr(GLfloat _in)
@@ -29,7 +30,7 @@ void Noise :: resetTables()
 	}
 	for(i=0; i<256; ++i)
 	{
-		m_noiseTable[i]=ngl::Random::randomPositiveNumber(32767.99);
+		m_noiseTable[i]=ngl::Random::randomPositiveNumber(32767.99f);
 	}
 
 }
@@ -50,7 +51,7 @@ Noise :: Noise()
 	m_noiseTable = std::make_unique<float []>(256);
 	for(i=0; i<256; ++i)
 	{
-		m_noiseTable[i]=ngl::Random::randomPositiveNumber(32767.99);
+		m_noiseTable[i]=ngl::Random::randomPositiveNumber(32767.99f);
 	}
 }
 
@@ -100,22 +101,22 @@ GLfloat Noise::noise(GLfloat scale, ngl::Vec3 p)
 
 GLfloat Noise::undulate(GLfloat x)
 {
-	if(x<-0.4) return 0.15 + 2.857 * sqr(x+0.75);
-	else if(x < 0.4) return 0.95 - 2.8125 * sqr(x);
-	else return 0.26 + 2.666 * sqr(x-0.7);
+	if(x<-0.4f) return 0.15f + 2.857f * sqr(x+0.75f);
+	else if(x < 0.4f) return 0.95f - 2.8125f * sqr(x);
+	else return 0.26f + 2.666f * sqr(x-0.7f);
 }
 
 
 
 GLfloat Noise :: turbulance(GLfloat s, ngl::Vec3 p)
 {
-	float val= (noise(s,p)/2.0) + (noise(2.0*s,p)/4.0) + (noise(4.0*s,p)/8.0) + (noise(8.0*s,p)/16.0);
+	float val= (noise(s,p)/2.0f) + (noise(2.0f*s,p)/4.0f) + (noise(4.0f*s,p)/8.0f) + (noise(8.0f*s,p)/16.0f);
 	return val;
 }
 
 GLfloat Noise::marble(GLfloat A, GLfloat s, ngl::Vec3 p)
 {
-	float val= undulate(cos(2*M_PI*p.m_z+A*turbulance(s,p)));
+	float val= undulate(cosf(2.0f*static_cast<float>(M_PI)*p.m_z+A*turbulance(s,p)));
 
 	return val;
 }

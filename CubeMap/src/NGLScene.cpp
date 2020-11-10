@@ -119,7 +119,7 @@ void NGLScene::initializeGL()
   m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_project=ngl::perspective(45,(float)720.0/576.0,0.1,350);
+  m_project=ngl::perspective(45,(float)720.0f/576.0f,0.1f,350.0f);
   
   // load a frag and vert shaders
 
@@ -140,11 +140,11 @@ void NGLScene::initializeGL()
   ngl::ShaderLib::use("TextureShader");
   ngl::ShaderLib::autoRegisterUniforms("TextureShader");
   ngl::VAOPrimitives::createSphere("sphere",1.0,40);
-  ngl::VAOPrimitives::createCylinder("cylinder",0.5,5,30,30);
-  ngl::VAOPrimitives::createCone("cone",0.5,1.4,20,20);
-  ngl::VAOPrimitives::createDisk("disk",0.5,40);
-  ngl::VAOPrimitives::createTrianglePlane("plane",1,1,10,10,ngl::Vec3(0,1,0));
-  ngl::VAOPrimitives::createTorus("torus",0.15,0.4,40,40);
+  ngl::VAOPrimitives::createCylinder("cylinder",0.5f,5.0f,30.0f,30.0f);
+  ngl::VAOPrimitives::createCone("cone",0.5f,1.4f,20.0f,20.0f);
+  ngl::VAOPrimitives::createDisk("disk",0.5f,40.0f);
+  ngl::VAOPrimitives::createTrianglePlane("plane",1.0f,1.0f,10.0f,10.0f,ngl::Vec3(0.0f,1.0f,0.0f));
+  ngl::VAOPrimitives::createTorus("torus",0.15f,0.4f,40.0f,40.0f);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
   m_cubeMap.reset( new CubeMap("textures/right.png","textures/left.png",

@@ -187,7 +187,7 @@ void NGLScene::initializeGL()
   ngl::ShaderLib::linkProgramObject("TextureShader");
   ngl::ShaderLib::use("TextureShader");
 
-  createCube(0.2);
+  createCube(0.2f);
   loadTexture();
   m_text=std::make_unique< ngl::Text>("fonts/Arial.ttf",14);
   m_text->setScreenSize(width(),height());
@@ -238,8 +238,8 @@ void NGLScene::paintGL()
 		{
 			m_transform.reset();
 			{
-				m_transform.setRotation(x*20,(x*z)*40,z*2);
-				m_transform.setPosition(x,0.49,z);
+				m_transform.setRotation(x*20.0f,(x*z)*40.0f,z*2.0f);
+				m_transform.setPosition(x,0.49f,z);
 				loadMatricesToShader();
 				++instances;
         glDrawArrays(GL_TRIANGLES, 0,36 );	// draw object
@@ -249,7 +249,7 @@ void NGLScene::paintGL()
 	// calculate and draw FPS
 	++m_frames;
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-	m_text->setColour(1,1,0);
+	m_text->setColour(1.0f,1.0f,0.0f);
 	m_text->renderText(10,700,fmt::format("Texture and Vertex Array Object {} instances Demo {} fps",instances,m_fps));
 }
 
