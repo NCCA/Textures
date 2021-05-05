@@ -5,6 +5,8 @@
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
+#include <ngl/NGLStream.h>
+#include <ngl/Random.h>
 #include <memory>
 #include <string>
 
@@ -35,39 +37,38 @@ NGLScene::NGLScene()
 
 void NGLScene::loadTexture()
 {
-  QImage image;
-  bool loaded=image.load("textures/crate.bmp");
-  if(loaded == true)
-  {
-    int width=image.width();
-    int height=image.height();
 
-    std::unique_ptr<unsigned char []> data = std::make_unique<unsigned char []>( width*height*3);
-    size_t index=0;
-    QRgb colour;
-    for( int y=0; y<height; ++y)
-    {
-      for( int x=0; x<width; ++x)
-      {
-        colour=image.pixel(x,y);
 
-        data[index++]=qRed(colour);
-        data[index++]=qGreen(colour);
-        data[index++]=qBlue(colour);
-      }
-    }
+  int mipLevel=0;
 
 
   glGenTextures(1,&m_textureName);
   glBindTexture(GL_TEXTURE_2D,m_textureName);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-
-  glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data.get());
-
-  glGenerateMipmap(GL_TEXTURE_2D); //  Allocate the mipmaps
-  glBindTexture(GL_TEXTURE_2D,0);
+  // using an image width of 128 gives us 6 mip levels so need 6 colours;
+  std::array<ngl::Vec3,6> colours={{
+    {1,0,0},{0,1,0},{0,0,1},{1,1,0},{1,1,1},{1,0,1}
+  }};
+  for(int ml=128; ml>=4; ml/=2)
+  {
+    std::cout<<"mip level"<<ml<<'\n';
+    std::vector<ngl::Vec3> data(ml*ml);
+    std::cout<<"data size "<<data.size()<<"using colour"<<colours[mipLevel]<<'\n';
+    for(auto &c : data)
+    {
+      c=colours[mipLevel];
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D,mipLevel,GL_RGB,ml,ml,0,GL_RGB,GL_FLOAT,&data[0].m_r);
+    
+    ++mipLevel;
   }
+//  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_BASE_LEVEL ,0);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL ,mipLevel-1);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LOD ,mipLevel-1);
+  
+  glBindTexture(GL_TEXTURE_2D,0);
 }
 
 
@@ -189,8 +190,6 @@ void NGLScene::initializeGL()
 
   createCube(0.2f);
   loadTexture();
-  m_text=std::make_unique< ngl::Text>("fonts/Arial.ttf",14);
-  m_text->setScreenSize(width(),height());
 
 }
 
@@ -249,8 +248,6 @@ void NGLScene::paintGL()
 	// calculate and draw FPS
 	++m_frames;
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-	m_text->setColour(1.0f,1.0f,0.0f);
-	m_text->renderText(10,700,fmt::format("Texture and Vertex Array Object {} instances Demo {} fps",instances,m_fps));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
