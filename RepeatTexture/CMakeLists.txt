@@ -37,7 +37,7 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
 )
-target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL Qt::OpenGLWidgets)
+target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL )
 
 add_custom_target(${TargetName}CopyShaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
