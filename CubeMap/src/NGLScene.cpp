@@ -9,6 +9,7 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
 #include <ngl/NGLStream.h>
+#include <iostream>
 
 const std::string NGLScene::s_vboNames[8] =
     {

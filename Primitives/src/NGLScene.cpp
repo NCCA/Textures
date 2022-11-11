@@ -6,6 +6,7 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
 #include <array>
+#include <iostream>
 
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief names of the primitives to draw

@@ -6,8 +6,9 @@
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
 #include <ngl/Texture.h>
+#include <iostream>
+
 //#include <QGLWidget>
-#include <QOpenGLWidget>
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------

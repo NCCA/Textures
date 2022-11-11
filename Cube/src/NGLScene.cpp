@@ -7,6 +7,7 @@
 #include <ngl/ShaderLib.h>
 #include <memory>
 #include <string>
+#include <iostream>
 
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
